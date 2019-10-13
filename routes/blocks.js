@@ -13,7 +13,7 @@ router.post('/mine', function (req, res, next) {
 
 
 router.get('/difficulty', function (req, res, next) {
-  res.send("pls, send data")
+  blocks.getDifficulty().then((resp) => res.send(resp)).catch((err) => console.log(err))
 });
 
 
