@@ -119,7 +119,7 @@ async function checkBlock(block) {
       
 
     }).catch((err) => {
-      
+
       blockArray = block.split('|')
       let nowDate = new Date();
 
@@ -146,7 +146,7 @@ async function checkBlock(block) {
 
       global.conn.collection("blocks").insertOne(data);
 
-    } //TODO: Check promise results
+    }) //TODO: Check promise results
 
 
 
