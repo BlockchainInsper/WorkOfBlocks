@@ -118,7 +118,35 @@ async function checkBlock(block) {
 
       
 
-    }).catch((err) => global.conn.collection("blocks").insertOne(block)) //TODO: Check promise results
+    }).catch((err) => {
+      
+      blockArray = block.split('|')
+      let nowDate = new Date();
+
+      if (blockArray[2].lenght > 50){
+        resolve({
+          "status": "error",
+          "data": "data more than 50 characters"
+        })
+
+      }
+
+      if (nowDate - new Date(blockArray[0]) > 5*60*1000) {
+        resolve({
+          "status": "error",
+          "data": "timestamp more than five minutes"
+        })
+
+      }
+
+      let data = {timestamp: + new Date(),
+        block: block,
+        hash: hash,
+        ip: ip}
+
+      global.conn.collection("blocks").insertOne(data);
+
+    } //TODO: Check promise results
 
 
 
