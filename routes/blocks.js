@@ -8,7 +8,8 @@ router.get('/', function (req, res, next) {
 });
 
 router.post('/mine', function (req, res, next) {
-  blocks.checkBlock().then((resp) => res.send(resp)).catch((err) => console.log(err))
+  data = req.body;
+  blocks.checkBlock(data).then((resp) => res.send(resp)).catch((err) => console.log(err))
 });
 
 

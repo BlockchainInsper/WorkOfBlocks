@@ -72,7 +72,7 @@ async function checkBlock(block) {
       blockArray = block.split('|')
 
 
-      //timestamp, nounce, dados
+      //block format: timestamp, nounce, dados
 
       let nowDate = new Date();
 
