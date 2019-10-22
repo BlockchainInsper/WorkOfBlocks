@@ -24,14 +24,13 @@ router.post('/mine', function (req, res, next) {
 
 router.get('/difficulty', function (req, res, next) {
   blocks.getDifficulty().then((resp) => {
-    res.send(resp)
+    
 
     if (resp.status === "success") {
       res.render("sucesso", {dif: resp.data.zeros})
     } else {
       res.render("falha")
     }
-
 
 
   }).catch((err) => console.log(err))
