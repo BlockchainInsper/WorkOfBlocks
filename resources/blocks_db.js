@@ -91,7 +91,10 @@ async function checkBlock(block, ip) {
 
                 let nowDate = new Date();
 
+                let canPlace = 1;
+
                 if (subHash !== strZeros) {
+                    canPlace = 0;
                     resolve({
                         "status": "error",
                         "data": "different difficulty"
@@ -100,6 +103,7 @@ async function checkBlock(block, ip) {
                 }
 
                 if (blockArray[2].lenght > 50) {
+                    canPlace = 0;
                     resolve({
                         "status": "error",
                         "data": "data more than 50 characters"
@@ -108,6 +112,7 @@ async function checkBlock(block, ip) {
                 }
 
                 if (nowDate - new Date(blockArray[0]) > 5 * 60 * 1000) {
+                    canPlace = 0;
                     resolve({
                         "status": "error",
                         "data": "timestamp more than five minutes"
@@ -122,8 +127,7 @@ async function checkBlock(block, ip) {
                     hash: hash,
                     ip: ip
                 }
-
-                global.conn.collection("blocks").insertOne(data) //TODO: Check promise results
+                if (canPlace) global.conn.collection("blocks").insertOne(data) //TODO: Check promise results
 
                 resolve({
                     "status": "success",
