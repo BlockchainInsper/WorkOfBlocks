@@ -31,7 +31,7 @@ async function getDifficulty() {
 
     return new Promise(function(resolve, reject) {
 
-        global.conn.collection("blocks").find({}).sort({ age: -1 }).limit(1).toArray(function(err, result) {
+        global.conn.collection("blocks").find({}).sort({ age: 1 }).limit(1).toArray(function(err, result) {
             if (err) throw err;
 
             if (result.length == 0) {
@@ -49,7 +49,7 @@ async function getDifficulty() {
 
                 let current_time = +new Date();
                 let difficulty = 9 - (current_time - result[result.length - 1].timestamp) / (1000 * 60 * 5);
-                console.log(result[result.length - 1].timestamp);
+                console.log(difficulty);
 
                 difficulty = difficulty > 0 ? Math.round(difficulty) : 0;
 
