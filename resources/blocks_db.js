@@ -31,7 +31,7 @@ async function getDifficulty() {
 
     return new Promise(function(resolve, reject) {
 
-        global.conn.collection("blocks").find({}).sort({ age: 1 }).limit(1).toArray(function(err, result) {
+        global.conn.collection("blocks").find({}).sort({ age: -1 }).limit(1).toArray(function(err, result) {
             if (err) throw err;
 
             if (result.length == 0) {
