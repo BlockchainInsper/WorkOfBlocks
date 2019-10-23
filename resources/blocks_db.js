@@ -48,7 +48,7 @@ async function getDifficulty() {
             } else {
 
                 let current_time = +new Date();
-                let difficulty = 9 - (current_time - result[result.length - 1].timestamp) / (1000 * 60 * 5);
+                let difficulty = 9 - (current_time - result[result.length - 1].timestamp) / (1000 * 60 * 60 * 3);
                 console.log(difficulty);
 
                 difficulty = difficulty > 0 ? Math.round(difficulty) : 0;
