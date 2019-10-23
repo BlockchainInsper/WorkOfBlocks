@@ -6,153 +6,176 @@ var crypto = require("crypto")
 
 async function getAllBlocks() {
 
-  return new Promise(function (resolve, reject) {
-    
-    global.conn.collection("blocks").find({}).sort( { age: -1 } ).limit(10).toArray(function(err, result) {
-      if (err) throw err;
-    
-      
-      resolve({
-        "status": "success",
-        "data": result
-      })
-      
+    return new Promise(function(resolve, reject) {
+
+        global.conn.collection("blocks").find({}).sort({ age: -1 }).limit(10).toArray(function(err, result) {
+            if (err) throw err;
+
+
+            resolve({
+                "status": "success",
+                "data": result
+            })
+
+        })
+
+
+
+
     })
-    
-
-
-
-  })
 }
 
 
 
 async function getDifficulty() {
 
-  return new Promise(function (resolve, reject) {
-    
-    global.conn.collection("blocks").find({}).sort( { age: -1 } ).limit(1).toArray(function(err, result) {
-      if (err) throw err;
+    return new Promise(function(resolve, reject) {
 
-      if (result[-1] == undefined) {
-        reject({
-          "status": "fail",
-          "data": "there is no block"
+        global.conn.collection("blocks").find({}).sort({ age: -1 }).limit(1).toArray(function(err, result) {
+            if (err) throw err;
 
+            if (result.length == 0) {
+                console.log("tere is no blocks");
+
+                resolve({
+                    "status": "error",
+                    "data": {
+                        "zeros": 0,
+                        "info": "there is no block"
+                    }
+
+                })
+            } else {
+
+                let current_time = +new Date();
+                let difficulty = 7 - (current_time - result[result.length - 1].timestamp) / (1000 * 60 * 5);
+                console.log(result[result.length - 1].timestamp);
+
+                difficulty = difficulty > 0 ? Math.abs(difficulty) : 0;
+
+                resolve({
+                    "status": "success",
+                    "data": {
+                        "zeros": Math.abs(difficulty),
+                        "info": "the number of zeros needed in front of the 256 hash"
+                    }
+                })
+            }
         })
-      } else {
-
-        let current_time = + new Date();
-        let difficulty = (current_time - Number(result[-1].timestamp))/(1000 * 60 * 5);
-        difficulty = difficulty > 0  ? difficulty : 0;
-      
-        resolve({
-          "status": "success",
-          "data": {
-            "zeros": difficulty,
-            "info": "the number of zeros needed in front of the 256 hash"
-        }
-      })
-      }
     })
-  })
 }
 
 
-async function checkBlock(block) {
+async function checkBlock(block, ip) {
 
-  return new Promise(function (resolve, reject) {
-    getDifficulty().then((resp) => {
-      const hash = crypto.createHmac('sha256')
-                   .update(block)
-                   .digest('hex');
-
-      let subHash = hash.substring(0,resp.data.zeros);
-      let strZeros = "0".repeat(resp.data.zeros);
-      blockArray = block.split('|')
+    return new Promise(function(resolve, reject) {
 
 
-      //block format: timestamp, nounce, dados
-
-      let nowDate = new Date();
-
-      if (subHash !== strZeros) {
-        resolve({
-          "status": "error",
-          "data": "different difficulty"
-        })
-        
-      }
-
-      if (blockArray[2].lenght > 50){
-        resolve({
-          "status": "error",
-          "data": "data more than 50 characters"
-        })
-
-      }
-
-      if (nowDate - new Date(blockArray[0]) > 5*60*1000) {
-        resolve({
-          "status": "error",
-          "data": "timestamp more than five minutes"
-        })
-
-      } 
-
-
-      let data = {timestamp: + new Date(),
-        block: block,
-        hash: hash,
-        ip: ip}
-
-      global.conn.collection("blocks").insertOne(data) //TODO: Check promise results
+        let hash = crypto.createHash('sha256')
+            .update(block).digest('hex');
 
 
 
-          
+        getDifficulty().then((resp) => {
 
-        
 
-        
+                let subHash = hash.substring(0, resp.data.zeros);
+                let strZeros = "0".repeat(resp.data.zeros);
+                blockArray = block.split('|')
 
-      
+                console.log("tatata" + subHash + resp.data.zeros);
 
-    }).catch((err) => {
 
-      blockArray = block.split('|')
-      let nowDate = new Date();
 
-      if (blockArray[2].lenght > 50){
-        resolve({
-          "status": "error",
-          "data": "data more than 50 characters"
-        })
+                //block format: timestamp, nounce, dados
 
-      }
+                let nowDate = new Date();
 
-      if (nowDate - new Date(blockArray[0]) > 5*60*1000) {
-        resolve({
-          "status": "error",
-          "data": "timestamp more than five minutes"
-        })
+                if (subHash !== strZeros) {
+                    resolve({
+                        "status": "error",
+                        "data": "different difficulty"
+                    })
 
-      }
+                }
 
-      let data = {timestamp: + new Date(),
-        block: block,
-        hash: hash,
-        ip: ip}
+                if (blockArray[2].lenght > 50) {
+                    resolve({
+                        "status": "error",
+                        "data": "data more than 50 characters"
+                    })
 
-      global.conn.collection("blocks").insertOne(data);
+                }
 
-    }) //TODO: Check promise results
+                if (nowDate - new Date(blockArray[0]) > 5 * 60 * 1000) {
+                    resolve({
+                        "status": "error",
+                        "data": "timestamp more than five minutes"
+                    })
+
+                }
+
+
+                let data = {
+                    timestamp: +new Date(),
+                    block: block,
+                    hash: hash,
+                    ip: ip
+                }
+
+                global.conn.collection("blocks").insertOne(data) //TODO: Check promise results
+
+                resolve({
+                    "status": "success",
+                    "data": "block inserted"
+                })
 
 
 
 
 
-  })
+
+
+
+
+            }).catch((err) => {
+
+                blockArray = block.split('|')
+
+                let nowDate = new Date();
+
+                if (blockArray[2].lenght > 50) {
+                    resolve({
+                        "status": "error",
+                        "data": "data more than 50 characters"
+                    })
+
+                }
+
+                if (nowDate - new Date(blockArray[0]) > 5 * 60 * 1000) {
+                    resolve({
+                        "status": "error",
+                        "data": "timestamp more than five minutes"
+                    })
+
+                }
+
+                let data = {
+                    timestamp: +new Date(),
+                    block: block,
+                    hash: hash,
+                    ip: ip
+                }
+
+                global.conn.collection("blocks").insertOne(data);
+
+            }) //TODO: Check promise results
+
+
+
+
+
+    })
 }
 
 
@@ -162,7 +185,7 @@ async function checkBlock(block) {
 
 
 module.exports = {
-  getAllBlocks,
-  getDifficulty,
-  checkBlock
+    getAllBlocks,
+    getDifficulty,
+    checkBlock
 };
